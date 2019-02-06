@@ -9,7 +9,7 @@ class Encryptor:
 
     def encrypt(self, data):
         encryptedData = AES.new(self.key, AES.MODE_CBC, self.iv)
-        paddedData = pad(data.encode("utf-8"), AES.block_size)
+        paddedData = pad(data, AES.block_size)
         cipherText = self.iv + encryptedData.encrypt(paddedData)
         return cipherText
 
@@ -17,4 +17,4 @@ class Encryptor:
         decryptedData = AES.new(self.key, AES.MODE_CBC, self.iv)
         plainText = decryptedData.decrypt(data)
         plainText = unpad(plainText, AES.block_size)
-        return plainText[AES.block_size:].decode("utf-8")
+        return plainText[AES.block_size:]

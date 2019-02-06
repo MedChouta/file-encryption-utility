@@ -19,23 +19,24 @@ if len(sys.argv) < 3:
     exit()
 
 elif sys.argv[2] == "-e":
-    with open(sys.argv[1], "r+") as file2Encrypt:
+    with open(sys.argv[1], "r+b") as file2Encrypt:
         data = file2Encrypt.read()
         encryptor = Encryptor(key, iv)  
         cipherText = encryptor.encrypt(data)
-        cipherText = base64.b64encode(cipherText).decode("utf-8")
-        with open("{}.enc".format(sys.argv[1]), "w") as encryptedFile:
+        cipherText = base64.b64encode(cipherText)
+        with open("{}.enc".format(sys.argv[1]), "wb") as encryptedFile:
             encryptedFile.write(cipherText)
     os.remove(sys.argv[1])
 
 elif sys.argv[2] == "-d":
     try:
-        with open(sys.argv[1], "r+") as file2Decrypt:
+        with open(sys.argv[1], "r+b") as file2Decrypt:
                 data = base64.b64decode(file2Decrypt.read())
                 decryptor = Encryptor(key, data[:AES.block_size])
                 plainText = decryptor.decrypt(data)
-                with open(sys.argv[1][:-4], "w") as decryptedFile:
+                with open(sys.argv[1][:-4], "wb") as decryptedFile:
                     decryptedFile.write(plainText)
+        os.remove(sys.argv[1])
     except:
         print("the file needs to be encrypted")
 else:

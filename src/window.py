@@ -1,4 +1,5 @@
 import sys
+import os
 from PyQt4 import QtGui, QtCore
 from functools import partial
 import main as entry
@@ -7,11 +8,19 @@ class Window(QtGui.QMainWindow):
     def __init__(self):
         super(Window, self).__init__()
         self.setGeometry(50, 50, 341, 509)
+        self.setFixedSize(341, 509)
         self.setWindowTitle("Encryption utility")
 
         self.home()
     
     def home(self):
+        #image
+        logoSize = 120
+        self.logo = QtGui.QLabel(self)
+        self.logo.setGeometry(341/2 - logoSize/2, 10, logoSize, logoSize)
+        self.logo.setPixmap(QtGui.QPixmap(os.getcwd() + "/logo.png"))
+
+        #File search bar
         self.labelFichier = QtGui.QLabel("Fichier:", self)
         self.labelFichier.move(5, 143)
 
@@ -19,22 +28,27 @@ class Window(QtGui.QMainWindow):
         self.searchBar.resize(241, 21)
         self.searchBar.move(50, 147)
 
+        #Search file button
         self.fileButton = QtGui.QToolButton(self)
         self.fileButton.clicked.connect(self.openFile)
         self.fileButton.setText("...")
         self.fileButton.resize(31, 24)
         self.fileButton.move(300, 145)
 
+
+        #Recent files
         self.labelRecent = QtGui.QLabel("Récent:", self)
         self.labelRecent.move(5, 180)
 
         self.recentFile = QtGui.QListWidget(self)
+        self.recentFile.itemDoubleClicked.connect(self.autoSearch)
         self.recentFile.resize(321, 211)
         self.recentFile.move(10, 210)
         self.readRecent()
 
         self.fileName = str()
 
+        #Encrypt/Decrypt Buttons
         self.encryptButton = QtGui.QPushButton("Chiffrer", self)
         self.encryptButton.clicked.connect(self.encrypt)
         self.encryptButton.move(20, 450)
@@ -52,10 +66,14 @@ class Window(QtGui.QMainWindow):
     
     def encrypt(self):
         key = self.enterKey().encode()
-        entry.encrypt(self.fileName, key)
-        self.fileName = self.fileName + ".enc"
-        self.addRecent()
-        self.readRecent()
+        try:
+            entry.encrypt(self.fileName, key)
+            self.fileName = self.fileName + ".enc"
+            self.addRecent()
+            self.readRecent()
+        except(FileNotFoundError):
+            QtGui.QMessageBox.critical(self, "Erreur", "Le fichier spécifié est introuvable")
+
         self.searchBar.setText("")
         self.fileName = ""
     
@@ -80,18 +98,34 @@ class Window(QtGui.QMainWindow):
             
 
     def readRecent(self):
+        self.recentFile.clear()
         with open("recent", "r") as recent:
-            content = recent.read()
-            uniq = content.split("\n")
-            uniq = set(uniq)
-            uniq = list(uniq)
-            print(uniq)
-            itemList =  [self.recentFile.item(i).text() for i in range(self.recentFile.count())]
-            print(itemList)
-            for item in itemList:
-                for uItem in uniq:
-                    if item != uItem:
-                        self.recentFile.addItems(item)       
+            paths = recent.read().split("\n")
+            #paths = paths.split("\n")
+            paths = filter(None, set(paths))
+            #paths = filter(None, paths)
+            paths = list(paths)
+            paths = self.fileExists(paths)
+            self.recentFile.addItems(paths)
+
+    def autoSearch(self, item):
+         self.searchBar.setText(item.text())
+         self.fileName = self.searchBar.text()
+    
+    def fileExists(self, fileList):
+        """ Checks if a file exists to filter the Recent files list
+            or to stop Encryption/Decryption if the file does not exist
+         """
+        
+        for file in fileList:
+            try:
+                with open(file, "r"):
+                    pass
+            except(FileNotFoundError):
+                fileList.remove(file)
+
+        return fileList
+
     
 def main():
     app = QtGui.QApplication(sys.argv)

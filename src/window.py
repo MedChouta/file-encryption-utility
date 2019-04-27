@@ -21,8 +21,8 @@ class Window(QtGui.QMainWindow):
         self.logo.setPixmap(QtGui.QPixmap(os.getcwd() + "/logo.png"))
 
         #File search bar
-        self.labelFichier = QtGui.QLabel("Fichier:", self)
-        self.labelFichier.move(5, 143)
+        self.labelFichier = QtGui.QLabel("File:", self)
+        self.labelFichier.move(10, 143)
 
         self.searchBar = QtGui.QLineEdit(self)
         self.searchBar.resize(241, 21)
@@ -37,7 +37,7 @@ class Window(QtGui.QMainWindow):
 
 
         #Recent files
-        self.labelRecent = QtGui.QLabel("Récent:", self)
+        self.labelRecent = QtGui.QLabel("Recent files:", self)
         self.labelRecent.move(5, 180)
 
         self.recentFile = QtGui.QListWidget(self)
@@ -49,11 +49,11 @@ class Window(QtGui.QMainWindow):
         self.fileName = str()
 
         #Encrypt/Decrypt Buttons
-        self.encryptButton = QtGui.QPushButton("Chiffrer", self)
+        self.encryptButton = QtGui.QPushButton("Encrypt", self)
         self.encryptButton.clicked.connect(self.encrypt)
         self.encryptButton.move(20, 450)
 
-        self.decryptButton = QtGui.QPushButton("Déchiffrer", self)
+        self.decryptButton = QtGui.QPushButton("Decrypt", self)
         self.decryptButton.clicked.connect(self.decrypt)
         self.decryptButton.move(221, 450)
 
@@ -72,7 +72,7 @@ class Window(QtGui.QMainWindow):
             self.addRecent()
             self.readRecent()
         except(FileNotFoundError):
-            QtGui.QMessageBox.critical(self, "Erreur", "Le fichier spécifié est introuvable")
+            QtGui.QMessageBox.critical(self, "Error", "The specified file was not found")
 
         self.searchBar.setText("")
         self.fileName = ""
@@ -87,7 +87,7 @@ class Window(QtGui.QMainWindow):
         self.fileName = ""
 
     def enterKey(self):
-        password, ok = QtGui.QInputDialog.getText(self, "chiffrement", "Veuillez entrer un mot de passe:")
+        password, ok = QtGui.QInputDialog.getText(self, "Password", "Please enter a password:")
         
         if ok:
             return password
